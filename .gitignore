@@ -1,0 +1,6 @@
+docx_extract/
+.DS_Store
+*.docx
+node_modules/
+.env
+.env.local
