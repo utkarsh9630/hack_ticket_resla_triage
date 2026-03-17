@@ -1,4 +1,4 @@
-# TicketGuard — Ticket Resale Scam Triage (Hackathon MVP)
+# TicketGuard — Ticket Resale Scam Triage
 
 TicketGuard helps fans buying resale tickets under time pressure quickly assess **scam risk indicators** and follow **safer steps** — reducing losses, anxiety, and decision paralysis.
 
@@ -13,6 +13,10 @@ This is **not** a chatbot. It’s an **action-first dashboard**: paste a listing
 
 ### Results (risk decision + reasons + actions)
 ![TicketGuard Results](docs/screenshots/02-results.png)
+
+### Results (templates + reasoning expanded)
+![TicketGuard Results Expanded](docs/screenshots/03-results-expanded.png)
+[Open full-size image](docs/screenshots/03-results-expanded.png)
 
 ---
 
@@ -152,7 +156,6 @@ This prevents demo failure during judging.
 - Deploy the Next.js app to Vercel
 - Set env vars in Vercel Project Settings (same keys as `.env.local`)
 - Commit `data/guidance/*` so the serverless function can load the corpus
-- Commit `docs/screenshots/*` so the README renders properly on GitHub
 
 Helpful docs (links):
 ```text
