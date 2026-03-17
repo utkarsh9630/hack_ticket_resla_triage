@@ -1,0 +1,83 @@
+[
+  {
+    "id": "obvious_scam_1",
+    "label": "Obvious scam — off-platform + urgency + Venmo",
+    "text": "Hey I have 2 floor seats for the show Saturday. My cousin bailed so I need to sell ASAP. Don't use the app it takes forever — message me on WhatsApp 555-123-4567 and I'll send you the tix. Venmo only, need payment in next 20 min or I'm giving them to someone else. $200 each.",
+    "platform": "Facebook Marketplace",
+    "payment_method": "Venmo",
+    "off_platform": true,
+    "urgency": true
+  },
+  {
+    "id": "obvious_scam_2",
+    "label": "Obvious scam — wire transfer + too good price",
+    "text": "Selling 4 Taylor Swift tickets section 105. $150 each (way below face). I'm traveling so can't use StubHub. Wire transfer or Zelle only. Send payment today and I'll email PDFs within 1 hour. No holds.",
+    "platform": "Craigslist",
+    "payment_method": "Zelle",
+    "off_platform": true,
+    "urgency": true
+  },
+  {
+    "id": "obvious_scam_3",
+    "label": "Obvious scam — cash in person pressure",
+    "text": "2 tickets for the game tonight. Meet me in the parking lot 30 min before. Cash only $400 for both. Don't post on the site they take fees. First one to show up with cash gets them. Text me now.",
+    "platform": "Craigslist",
+    "payment_method": "Cash",
+    "off_platform": true,
+    "urgency": true
+  },
+  {
+    "id": "borderline_1",
+    "label": "Borderline — on-platform but Venmo and some urgency",
+    "text": "Selling 1 ticket for the concert next week. Section 204. $180. I prefer Venmo — can do it through the app if you want. Would like to sell by tomorrow since I have another buyer interested. Let me know!",
+    "platform": "StubHub",
+    "payment_method": "Venmo",
+    "off_platform": false,
+    "urgency": true
+  },
+  {
+    "id": "borderline_2",
+    "label": "Borderline — new seller, vague details",
+    "text": "I have tickets for the festival. Good seats. Message me for price. Can do PayPal or Venmo. Need to move them this week.",
+    "platform": "Facebook Marketplace",
+    "payment_method": "Venmo",
+    "off_platform": false,
+    "urgency": true
+  },
+  {
+    "id": "low_risk_1",
+    "label": "Low risk — on-platform, clear details, PayPal",
+    "text": "Selling 2 tickets to Hamilton, March 22, Orchestra Row G seats 101-102. Transfer via Ticketmaster transfer. $250 each. Payment through StubHub checkout only. Happy to answer any questions about the seats.",
+    "platform": "StubHub",
+    "payment_method": "Credit card",
+    "off_platform": false,
+    "urgency": false
+  },
+  {
+    "id": "low_risk_2",
+    "label": "Low risk — verified resale, no pressure",
+    "text": "Listed 1 ticket for the basketball game Tuesday. Section 112. Price is firm at $95. You'll get the official transfer link from the platform after purchase. No rush — listing is up until sold.",
+    "platform": "Vivid Seats",
+    "payment_method": "PayPal",
+    "off_platform": false,
+    "urgency": false
+  },
+  {
+    "id": "killer_demo",
+    "label": "Killer live demo — strong scam signals, judge-friendly",
+    "text": "LAST 2 TICKETS for the sold-out show tonight! My friend can't go. Don't use the app — they hold your money for days. Text me at 555-987-6543 and send $300 via Venmo or Cash App in the next 10 minutes and I'll transfer them to you right away. First to pay gets them. No refunds.",
+    "platform": "Facebook Marketplace",
+    "payment_method": "Venmo",
+    "off_platform": true,
+    "urgency": true
+  },
+  {
+    "id": "backup_demo",
+    "label": "Backup demo — medium risk, mixed signals",
+    "text": "Selling 3 tickets to the comedy show this Friday. Section 205. $75 each. I can do PayPal or we can do it through the site — your choice. Would prefer to close the deal by Thursday. DM me if interested.",
+    "platform": "StubHub",
+    "payment_method": "PayPal",
+    "off_platform": false,
+    "urgency": true
+  }
+]
