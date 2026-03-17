@@ -6,6 +6,16 @@ This is **not** a chatbot. It’s an **action-first dashboard**: paste a listing
 
 ---
 
+## Screenshots
+
+### Triage dashboard (input + agent pipeline)
+![TicketGuard Triage](docs/screenshots/01-triage.png)
+
+### Results (risk decision + reasons + actions)
+![TicketGuard Results](docs/screenshots/02-results.png)
+
+---
+
 ## What makes it “agentic” (not just text generation)
 TicketGuard uses a **multi-agent Chain-of-Debate (CoD)** workflow:
 - Draft multiple candidate plans (Planner / Evidence / User Advocate)
@@ -142,6 +152,7 @@ This prevents demo failure during judging.
 - Deploy the Next.js app to Vercel
 - Set env vars in Vercel Project Settings (same keys as `.env.local`)
 - Commit `data/guidance/*` so the serverless function can load the corpus
+- Commit `docs/screenshots/*` so the README renders properly on GitHub
 
 Helpful docs (links):
 ```text
