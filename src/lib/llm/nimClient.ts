@@ -1,5 +1,6 @@
-import { readFile, readdir } from "node:fs/promises";
-import path from "node:path";
+// Static imports replace runtime fs.readFile/readdir — required for Vercel serverless.
+import { SYSTEM_PROMPT } from "@/lib/data/systemPrompt";
+import { GUIDANCE_CONTEXT } from "@/lib/data/guidanceContext";
 
 import type { NormalizedTriageRequest } from "@/lib/types/triage";
 
@@ -18,7 +19,6 @@ export async function requestNemotronTriage(input: NormalizedTriageRequest): Pro
   const model = process.env.NIM_MODEL ?? DEFAULT_MODEL;
   const timeoutMs = Number(process.env.NIM_TIMEOUT_MS ?? DEFAULT_TIMEOUT_MS);
 
-  const [systemPrompt, guidanceContext] = await Promise.all([loadPrompt(), loadGuidanceContext()]);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -44,11 +44,11 @@ export async function requestNemotronTriage(input: NormalizedTriageRequest): Pro
         messages: [
           {
             role: "system",
-            content: systemPrompt,
+            content: SYSTEM_PROMPT,
           },
           {
             role: "user",
-            content: buildUserPrompt(input, guidanceContext),
+            content: buildUserPrompt(input),
           },
         ],
       }),
@@ -76,46 +76,12 @@ export async function requestNemotronTriage(input: NormalizedTriageRequest): Pro
   }
 }
 
-async function loadPrompt(): Promise<string> {
-  try {
-    const promptPath = path.join(process.cwd(), "prompts", "prompt.txt");
-    return await readFile(promptPath, "utf8");
-  } catch {
-    return [
-      "You are TicketGuard, a scam-triage supervisor for ticket resale safety.",
-      "Return JSON only. Do not use markdown. Do not include commentary outside JSON.",
-      "Never accuse a seller of criminal intent. Use non-accusatory language about risk indicators.",
-      "Calibrate confidence between 0 and 1.",
-      "Always return exactly these top-level keys:",
-      "risk_level, confidence, banner, reasons, action_steps, templates, cod_log",
-      "The reasons array should contain up to 3 concise, evidence-backed items.",
-    ].join(" ");
-  }
-}
-
-async function loadGuidanceContext(): Promise<string> {
-  try {
-    const guidanceDir = path.join(process.cwd(), "data", "guidance");
-    const files = (await readdir(guidanceDir)).filter((file) => file.endsWith(".md")).sort();
-    const contents = await Promise.all(
-      files.map(async (file) => {
-        const content = await readFile(path.join(guidanceDir, file), "utf8");
-        return `FILE: ${file}\n${content}`;
-      }),
-    );
-
-    return contents.join("\n\n---\n\n");
-  } catch {
-    return "";
-  }
-}
-
-function buildUserPrompt(input: NormalizedTriageRequest, guidanceContext: string): string {
+function buildUserPrompt(input: NormalizedTriageRequest): string {
   return JSON.stringify(
     {
       task: "Analyze the following ticket resale interaction for scam risk and output strict JSON only.",
       input,
-      guidance_context: guidanceContext,
+      guidance_context: GUIDANCE_CONTEXT,
     },
     null,
     2,
