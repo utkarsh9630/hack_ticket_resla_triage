@@ -2,9 +2,11 @@
 
 TicketGuard helps fans buying resale tickets under time pressure quickly assess **scam risk indicators** and follow **safer steps** — reducing losses, anxiety, and decision paralysis.
 
-This is **not** a chatbot. It’s an **action-first dashboard**: paste a listing/seller chat → get a **risk level + confidence**, **top reasons with evidence**, a **safer-step checklist**, and **copyable templates** (verification message + platform report + containment steps).
+This is **not** a chatbot. It's an **action-first dashboard**: paste a listing/seller chat → get a **risk level + confidence**, **top reasons with evidence**, a **safer-step checklist**, and **copyable templates** (verification message + platform report + containment steps).
 
-# Live Demo: https://hack-ticket-resla-triage.vercel.app/
+**Live:** [hack-ticket-resla-triage.vercel.app](https://hack-ticket-resla-triage.vercel.app)
+
+Built at the **NVIDIA + Vercel Hackathon** hosted at San Jose State University during NVIDIA GTC 2026.
 
 ---
 
@@ -18,91 +20,151 @@ This is **not** a chatbot. It’s an **action-first dashboard**: paste a listing
 
 ### Results (templates + reasoning expanded)
 ![TicketGuard Results Expanded](docs/screenshots/03-results-expanded.png)
-[Open full-size image](docs/screenshots/03-results-expanded.png)
 
 ---
 
-## What makes it “agentic” (not just text generation)
+## What makes it "agentic" (not just text generation)
+
 TicketGuard uses a **multi-agent Chain-of-Debate (CoD)** workflow:
 - Draft multiple candidate plans (Planner / Evidence / User Advocate)
 - Critique plans (Red-Team + Risk/Compliance)
 - Supervisor selects final response with **confidence** and a short rationale log
-- **Boundary Manager** behavior: for high risk, it escalates to “Stop & Verify” steps
+- **Boundary Manager** behavior: for high risk, escalates to "Stop & Verify" steps
 
 ---
 
-## Tech stack
-- **Frontend:** Next.js (App Router) + TypeScript + Tailwind + shadcn/ui
+## Tech Stack
+
+- **Frontend:** Next.js 15 (App Router) + TypeScript + Tailwind + shadcn/ui
 - **Backend:** Next.js API Route `POST /api/triage` (Vercel Serverless)
-- **LLM:** NVIDIA NIM endpoint using a Nemotron-capable instruction model (recommended: `mistralai/mistral-nemotron`)
-- **RAG grounding (minimal):** local guidance corpus + retrieval (keyword top-k) injected into LLM prompt
-- **Optional safety pass:** `nvidia/nemotron-content-safety-reasoning-4b`
+- **LLM:** NVIDIA NIM endpoint — Nemotron (`nvidia/nemotron-3-super-120b-a12b`)
+- **Grounding:** Static guidance corpus (FTC, BBB, Ticketmaster) bundled at build time as TypeScript constants
+- **Deployment:** Vercel
 
 ---
 
-## Architecture (high level)
+## Architecture
 
-```text
-User -> Next.js UI (Vercel) -> POST /api/triage (Serverless)
-    -> Retriever (local guidance docs) -> CoD Orchestrator
-    -> LLM via NVIDIA NIM (Nemotron) -> Guardrails
-    -> JSON -> UI (Risk + Reasons + Actions + Templates + CoD log)
 ```
+User → Next.js UI (Vercel) → POST /api/triage (Serverless)
+    → Static Guidance Context → CoD Orchestrator
+    → LLM via NVIDIA NIM (Nemotron)
+    → JSON → UI (Risk + Reasons + Actions + Templates + CoD log)
+```
+
+---
+
+## Project Structure
+
+```
+ticketguard/
+├── src/
+│   ├── app/
+│   │   ├── api/triage/route.ts       # API route — calls Nemotron, returns JSON
+│   │   ├── page.tsx                  # Main UI
+│   │   ├── layout.tsx
+│   │   └── globals.css
+│   └── lib/
+│       ├── data/
+│       │   ├── systemPrompt.ts       # System prompt (bundled static string)
+│       │   └── guidanceContext.ts    # All guidance docs (bundled static string)
+│       ├── llm/
+│       │   └── nimClient.ts          # NVIDIA NIM API client
+│       ├── triage/
+│       │   ├── fallback.ts           # Graceful fallback if LLM fails
+│       │   ├── normalize.ts          # Input normalization
+│       │   ├── validate.ts           # Response validation
+│       │   └── smoke.ts
+│       └── types/
+│           └── triage.ts             # TypeScript types
+├── data/guidance/                    # Source guidance .md files (for reference)
+├── prompts/prompt.txt                # Source system prompt (for reference)
+├── next.config.ts
+├── vercel.json
+└── package.json
+```
+
+---
+
+## What was changed for Vercel compatibility
+
+| File | Change | Reason |
+|---|---|---|
+| `src/lib/llm/nimClient.ts` | Removed `fs.readFile` / `readdir` for prompt and guidance files | Vercel serverless functions cannot read arbitrary files at runtime — the filesystem is frozen |
+| `src/lib/data/systemPrompt.ts` | **New file** — system prompt exported as a TypeScript string constant | Replaces runtime `fs.readFile("prompts/prompt.txt")` with a build-time import |
+| `src/lib/data/guidanceContext.ts` | **New file** — all 4 guidance `.md` files combined as a TypeScript string constant | Replaces runtime `fs.readdir("data/guidance/")` with a build-time import |
+| `package.json` | `next` bumped `15.2.2 → 15.2.6`, `react` / `react-dom` bumped `19.0.0 → 19.0.3` | **Security fix:** CVE-2025-66478 (CVSS 10.0) — RCE vulnerability in React Server Components affecting all Next.js 15.x builds below 15.2.6 |
+
+---
+
+## Security
+
+This project was updated to patch **CVE-2025-66478** — a critical (CVSS 10.0) Remote Code Execution vulnerability in React Server Components affecting Next.js 15.0–15.2.5.
+
+**Patched versions in use:**
+- `next`: 15.2.6
+- `react` / `react-dom`: 19.0.3
 
 ---
 
 ## Setup (local)
 
-### 1) Install
+### 1. Install
+
 ```bash
-# Node 18+ (recommended 20+)
-pnpm install
+# Node 18+ required (20+ recommended)
+npm install
 ```
 
-### 2) Environment variables
+### 2. Environment variables
+
 Create `.env.local`:
+
 ```bash
-# LLM (NVIDIA NIM / Nemotron)
-NIM_BASE_URL=...
-NIM_API_KEY=...
-NIM_MODEL=...
+NIM_BASE_URL=https://integrate.api.nvidia.com/v1
+NIM_API_KEY=your_nvidia_nim_api_key
+NIM_MODEL=nvidia/nemotron-3-super-120b-a12b
 NIM_TIMEOUT_MS=20000
-
-# RAG
-RAG_TOP_K=4
-RAG_CHUNK_DIR=./data/guidance
-RETRIEVAL_MODE=keyword  # keyword | vector (optional)
-
-NEXT_PUBLIC_APP_NAME=TicketGuard
 ```
 
-### 3) Run
+### 3. Run
+
 ```bash
-pnpm dev
+npm run dev
 ```
-Open http://localhost:3000
+
+Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## RAG corpus (public guidance docs)
-Store 4–8 docs as Markdown in:
-```text
-data/guidance/
-  ftc_bots_act.md
-  ftc_enforcement_bypass_limits.md
-  ticketmaster_scam_tips.md
-  bbb_reseller_tips.md
+## Deployment to Vercel
+
+1. **Push to GitHub:**
+```bash
+git add .
+git commit -m "Initial commit"
+git push origin main
 ```
 
-Each file should include a header with:
-- `Title:`
-- `Source URL:`
+2. **Import to Vercel:**
+- Go to [vercel.com](https://vercel.com) → **Add New Project** → import your repo
+- Vercel auto-detects Next.js — no build config needed
 
-**No live web scraping is required** for demo reliability.
+3. **Add environment variables** in Vercel → Settings → Environment Variables:
+
+| Key | Value |
+|---|---|
+| `NIM_API_KEY` | Your NVIDIA NIM API key |
+| `NIM_BASE_URL` | `https://integrate.api.nvidia.com/v1` |
+| `NIM_MODEL` | `nvidia/nemotron-3-super-120b-a12b` |
+| `NIM_TIMEOUT_MS` | `20000` |
+
+4. **Deploy** — live in ~60 seconds. Redeploys automatically on every `git push`.
 
 ---
 
-## API contract
+## API Contract
+
 **POST** `/api/triage`
 
 Request:
@@ -137,30 +199,34 @@ Response:
 
 ---
 
-## Safety & guardrails (must-follow)
-- **Non-accusatory language:** “risk indicators suggest…” not “this is a scam”
-- **No enabling wrongdoing:** no instructions for bypassing ticket limits/bots/fraud
-- **Victim path:** if the user already paid, provide containment steps + reporting guidance
-- **Disclaimer:** “Educational guidance only; cannot guarantee authenticity.”
+## Safety & Guardrails
+
+- **Non-accusatory language:** "risk indicators suggest…" not "this is a scam"
+- **No enabling wrongdoing:** no instructions for bypassing ticket limits or fraud
+- **Victim path:** if the user already paid, containment steps + reporting guidance are included
+- **Disclaimer:** "Educational guidance only; cannot guarantee authenticity."
 
 ---
 
-## Demo mode
-Include 2 preset buttons in the UI:
-- **Obvious scam** (off-platform + irreversible payment + urgency)
-- **Borderline legit** (in-platform transfer + safer payment)
+## Demo Mode
 
-This prevents demo failure during judging.
+Two preset examples are built into the UI:
+- **Obvious scam** — off-platform + irreversible payment + urgency
+- **Borderline legit** — in-platform transfer + safer payment method
 
 ---
 
-## Deployment (Vercel)
-- Deploy the Next.js app to Vercel
-- Set env vars in Vercel Project Settings (same keys as `.env.local`)
-- Commit `data/guidance/*` so the serverless function can load the corpus
+## Academic Context
 
-Helpful docs (links):
-```text
-Vercel docs: https://vercel.com/docs
-Next.js on Vercel: https://vercel.com/docs/frameworks/nextjs
-```
+Built at the NVIDIA + Vercel Hackathon hosted at San Jose State University during NVIDIA GTC 2026, as part of the Applied Data Intelligence MS program.
+
+---
+
+## Contact
+
+**Utkarsh Tripathi**
+- GitHub: [@utkarsh9630](https://github.com/utkarsh9630)
+- LinkedIn: [Utkarsh Tripathi](https://www.linkedin.com/in/tripathiutkarsh46/)
+- Email: tripathiutkarsh46@gmail.com
+
+MS Student — Applied Data Intelligence, San Jose State University
