@@ -4,6 +4,8 @@ TicketGuard helps fans buying resale tickets under time pressure quickly assess 
 
 This is **not** a chatbot. It’s an **action-first dashboard**: paste a listing/seller chat → get a **risk level + confidence**, **top reasons with evidence**, a **safer-step checklist**, and **copyable templates** (verification message + platform report + containment steps).
 
+# Live Demo: https://hack-ticket-resla-triage.vercel.app/
+
 ---
 
 ## Screenshots
